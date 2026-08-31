@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MATKA — Demo</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#070b16;color:#fff;font-family:Arial,sans-serif}
+header{height:70px;background:#0c1120;border-bottom:1px solid #293149;display:flex;align-items:center;justify-content:space-between;padding:0 18px}
+.logo{font-size:21px;font-weight:800}.logo span{color:#ef4444}.wallet{background:#171d31;padding:10px 16px;border-radius:10px}
+.wrap{max-width:1000px;margin:auto;padding:22px}.grid{display:grid;grid-template-columns:1fr 330px;gap:18px}
+.card{background:#0d1425;border:1px solid #273149;border-radius:16px;padding:20px}
+h1{text-align:center;margin:4px 0 8px}.sub{text-align:center;color:#aab3c9}
+.stage{display:flex;justify-content:center;margin:25px 0 18px}
+.wheelbox{position:relative;width:310px;height:310px}
+.wheel{width:310px;height:310px;border-radius:50%;border:10px solid #161b2c;
+background:conic-gradient(#e52b35 0deg 180deg,#12a957 180deg 360deg);
+box-shadow:0 0 35px rgba(0,0,0,.45);transition:transform 4s cubic-bezier(.12,.8,.2,1)}
+.needle{position:absolute;z-index:4;left:50%;top:-18px;transform:translateX(-50%);
+width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-top:0;border-bottom:34px solid #fff;filter:drop-shadow(0 2px 4px #000)}
+.center{position:absolute;z-index:3;left:50%;top:50%;transform:translate(-50%,-50%);width:62px;height:62px;border-radius:50%;
+background:#111827;border:7px solid #fff;display:flex;align-items:center;justify-content:center;font-size:25px}
+.labels{position:absolute;inset:0;z-index:2;pointer-events:none;font-size:27px;font-weight:900}
+.redtxt{position:absolute;left:35px;top:125px}.greentxt{position:absolute;right:30px;top:125px}
+.timer{text-align:center;font-size:29px;font-weight:800;color:#c084fc}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+.choice{padding:17px;border:2px solid transparent;border-radius:11px;color:#fff;font-weight:800;font-size:19px;cursor:pointer}
+.r{background:#b91c2a}.g{background:#078a49}.choice.sel{border-color:#fff;box-shadow:0 0 0 2px #a855f7}
+.amounts{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.amounts button{background:#11192c;color:#fff;border:1px solid #35405c;padding:9px 13px;border-radius:8px}
+input{width:100%;background:#10182b;color:#fff;border:1px solid #35405c;padding:12px;border-radius:9px}
+.predict{width:100%;margin-top:12px;padding:14px;border:0;border-radius:9px;background:linear-gradient(90deg,#7c3aed,#c026d3);color:#fff;font-weight:800;font-size:16px;cursor:pointer}
+.spin{width:100%;margin-top:12px;padding:14px;border:0;border-radius:9px;background:#f59e0b;color:#111827;font-weight:900;font-size:17px;cursor:pointer}
+.result{margin-top:16px;text-align:center;font-size:20px;font-weight:800;min-height:28px}
+.row{display:flex;justify-content:space-between;border-bottom:1px solid #273149;padding:11px 0;color:#dbe2f2}
+.notice{font-size:12px;color:#8f9ab2;line-height:1.5;margin-top:14px}
+nav{display:flex;gap:8px}.navbtn{background:#171d31;color:#fff;border:1px solid #343e5b;padding:9px 12px;border-radius:8px;cursor:pointer}
+.navbtn:hover{background:#5420a5}.portal{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;padding:18px;z-index:20}
+.portalbox{width:min(520px,100%);background:#0d1425;border:1px solid #34405c;border-radius:16px;padding:22px;box-shadow:0 20px 70px #000}
+.portalbox h2{margin-top:0}.close{float:right;background:#252d45;color:#fff;border:0;border-radius:7px;padding:7px 10px;cursor:pointer}
+.formrow{margin:12px 0}.formrow label{display:block;color:#b8c1d7;margin-bottom:6px;font-size:14px}
+.formrow input,.formrow textarea,.formrow select{width:100%;background:#10182b;color:#fff;border:1px solid #35405c;padding:12px;border-radius:9px}
+.save{width:100%;padding:13px;border:0;border-radius:9px;background:linear-gradient(90deg,#7c3aed,#c026d3);color:#fff;font-weight:800;cursor:pointer}
+.profile{display:grid;grid-template-columns:80px 1fr;gap:15px;align-items:center}.avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#ef4444);display:flex;align-items:center;justify-content:center;font-size:32px}
+.small{font-size:12px;color:#8f9ab2;margin-top:10px}
+@media(max-width:800px){header{height:auto;min-height:70px;gap:8px;flex-wrap:wrap}.grid{grid-template-columns:1fr}.wheelbox,.wheel{width:280px;height:280px}.redtxt{left:30px;top:112px}.greentxt{right:25px;top:112px}nav{order:3;width:100%;justify-content:center;padding-bottom:8px}}
+
+.adminpanel{margin-top:18px}.customers{display:grid;gap:10px}.customer{background:#10182b;border:1px solid #2b3650;border-radius:10px;padding:12px;display:flex;align-items:center;justify-content:space-between;gap:10px}.customer b{display:block}.customer small{color:#8995ae}.adminactions{display:flex;gap:6px;flex-wrap:wrap}.adminactions button{background:#202a43;color:#fff;border:1px solid #394665;border-radius:7px;padding:7px 10px;cursor:pointer}.adminactions .add{background:#087f48}.adminactions .sub{background:#9f1d2a}.search{margin-bottom:12px}
+
+</head>
+<body>
+<header>
+<div class="logo">◉ <span>MATKA</span></div>
+<nav>
+<button class="navbtn" onclick="openPortal('owner')">👤 Owner Profile</button>
+<button class="navbtn" onclick="openPortal('customer')">📝 Customer Registration</button>
+</nav>
+<div class="wallet">🪙 Demo Coins: <b id="balance">10,000</b></div>
+</header>
+<div class="wrap">
+<div class="grid">
+<main class="card">
+<h1>Red / Green Prediction Wheel</h1>
+<div class="sub">Wheel घूमेगा और ऊपर की सूई जिस रंग पर रुकेगी वही demo result होगा.</div>
+
+<div class="stage">
+<div class="wheelbox">
+<div id="wheel" class="wheel"></div>
+<div class="labels"><div class="redtxt">RED</div><div class="greentxt">GREEN</div></div>
+<div class="needle"></div><div class="center">★</div>
+</div>
+</div>
+
+<div class="timer">Next round: <span id="timer">15</span>s</div>
+
+<div class="choices">
+<button class="choice r" onclick="choose('RED',this)">🔴 RED</button>
+<button class="choice g" onclick="choose('GREEN',this)">🟢 GREEN</button>
+</div>
+<div class="amounts">
+<button onclick="amt(10)">10</button><button onclick="amt(50)">50</button>
+<button onclick="amt(100)">100</button><button onclick="amt(500)">500</button>
+<button onclick="amt(1000)">1000</button>
+</div>
+<input id="amount" type="number" min="1" value="10">
+<button class="predict" onclick="predict()">Place Demo Prediction</button>
+<button class="spin" onclick="spin()">SPIN WHEEL</button>
+<div id="result" class="result"></div>
+<div class="notice">यह practice/demo version है। इसमें real money, deposit, withdrawal या cash payout नहीं है।</div>
+</main>
+
+<aside>
+<section class="card">
+<h2>👑 Owner / Customer</h2>
+<p class="notice">Owner demo panel: customer के virtual coins manage करें।</p>
+<input id="searchCustomer" class="search" placeholder="Customer search..." oninput="renderCustomers()">
+<div id="customers" class="customers"></div>
+<button class="spin" style="margin-top:14px" onclick="addDemoCustomer()">+ Add Demo Customer</button>
+</section>
+<section class="card" style="margin-top:18px">
+<h2>Round Info</h2>
+<div class="row"><span>Round</span><b id="round">100001</b></div>
+<div class="row"><span>Your choice</span><b id="choice">—</b></div>
+<div class="row"><span>Virtual coins</span><b id="bet">0</b></div>
+<h3>Recent Results</h3>
+<div id="history"><div class="row"><span>100000</span><span>🟢 GREEN</span></div>
+<div class="row"><span>99999</span><span>🔴 RED</span></div>
+<div class="row"><span>99998</span><span>🟢 GREEN</span></div></div>
+</aside>
+</div>
+</div>
+<script>
+let selected=null, balance=10000, round=100001, seconds=15, rotation=0, spinning=false, bet=0;
+const wheel=document.getElementById('wheel');
+function choose(c,el){
+ selected=c; document.querySelectorAll('.choice').forEach(x=>x.classList.remove('sel')); el.classList.add('sel');
+ document.getElementById('choice').textContent=c;
+}
+function amt(n){document.getElementById('amount').value=n}
+function predict(){
+ if(!selected)return alert('पहले RED या GREEN चुनें।');
+ bet=Number(document.getElementById('amount').value);
+ if(!bet || bet<1)return alert('Valid virtual coin amount डालें।');
+
+ // Customer-specific virtual balance
+ if(activeCustomer){
+   if(bet>activeCustomer.coins)return alert('इस customer के पास इतने virtual coins नहीं हैं।');
+   activeCustomer.coins-=bet;
+   document.getElementById('balance').textContent=activeCustomer.coins.toLocaleString();
+   document.getElementById('bet').textContent=bet.toLocaleString();
+   renderCustomers();
+   document.getElementById('result').textContent='Prediction placed ✓ — '+activeCustomer.name;
+ } else {
+   if(bet>balance)return alert('Virtual coin balance पर्याप्त नहीं है।');
+   balance-=bet; document.getElementById('balance').textContent=balance.toLocaleString();
+   document.getElementById('bet').textContent=bet.toLocaleString();
+   document.getElementById('result').textContent='Prediction placed ✓';
+ }
+}
+function spin(){
+ if(spinning)return;
+ spinning=true; document.getElementById('result').textContent='Wheel spinning…';
+ // Randomly choose a half: 0-180 = RED, 180-360 = GREEN.
+ const winner=Math.random()<.5?'RED':'GREEN';
+ // With the pointer at 12 o'clock, choose an angle in the middle of the desired half.
+ const target=winner==='RED' ? (45+Math.random()*90) : (225+Math.random()*90);
+ const current=rotation%360;
+ const delta=((360-target-current)%360)+360*(5+Math.floor(Math.random()*3));
+ rotation+=delta; wheel.style.transform=`rotate(${rotation}deg)`;
+ setTimeout(()=>{
+   const won = selected === winner;
+   if(activeCustomer && bet>0){
+     if(won) activeCustomer.coins += bet*2;
+     document.getElementById('balance').textContent=activeCustomer.coins.toLocaleString();
+     renderCustomers();
+     document.getElementById('result').textContent='Result: '+(winner==='RED'?'🔴 RED':'🟢 GREEN')+' — '+(won?'WIN +'+(bet*2)+' coins':'LOSS -'+bet+' coins');
+   } else {
+     document.getElementById('result').textContent='Result: '+(winner==='RED'?'🔴 RED':'🟢 GREEN')+(bet?(' — '+(won?'WIN':'LOSS')):'');
+   }
+   const h=document.getElementById('history'); h.innerHTML=`<div class="row"><span>${round}</span><span>${winner==='RED'?'🔴 RED':'🟢 GREEN'}</span></div>`+h.innerHTML;
+   round++; document.getElementById('round').textContent=round;
+   selected=null; bet=0; document.getElementById('choice').textContent='—'; document.getElementById('bet').textContent='0';
+   document.querySelectorAll('.choice').forEach(x=>x.classList.remove('sel'));
+   spinning=false; seconds=15;
+ },4100);
+}
+setInterval(()=>{
+ if(seconds>0)seconds--;
+ document.getElementById('timer').textContent=seconds;
+ if(seconds===0 && !spinning) spin();
+},1000);
+</script>
+
+<div id="ownerPortal" class="portal" onclick="closeOutside(event,'ownerPortal')">
+<div class="portalbox">
+<button class="close" onclick="closePortal('ownerPortal')">✕</button>
+<h2>👤 Game Owner Profile</h2>
+<div class="profile">
+<div class="avatar">👑</div>
+<div><h3 id="ownerName">Demo Game Owner</h3><div class="small">Owner ID: DEMO-001</div></div>
+</div>
+<div class="formrow"><label>Owner / Game Name</label><input id="ownerInput" value="Red Green Wheel"></div>
+<div class="formrow"><label>About</label><textarea id="ownerAbout" rows="3">MATKA — Demo Practice Game</textarea></div>
+<button class="save" onclick="saveOwner()">Save Owner Profile</button>
+<p class="small">यह profile केवल demo administration के लिए है।</p>
+</div></div>
+
+<div id="customerPortal" class="portal" onclick="closeOutside(event,'customerPortal')">
+<div class="portalbox">
+<button class="close" onclick="closePortal('customerPortal')">✕</button>
+<h2>📝 Customer Registration</h2>
+<div class="formrow"><label>Full Name</label><input id="custName" placeholder="अपना नाम"></div>
+<div class="formrow"><label>Mobile Number</label><input id="custMobile" type="tel" maxlength="10" placeholder="10 digit mobile number"></div>
+<div class="formrow"><label>Email (optional)</label><input id="custEmail" type="email" placeholder="example@email.com"></div>
+<div class="formrow"><label>Password</label><input id="custPass" type="password" placeholder="Demo password"></div>
+<button class="save" onclick="registerCustomer()">Create Demo Account</button>
+<p id="regMsg" class="small"></p>
+<p class="small">यह registration केवल demo account बनाता है; कोई real-money account या payment नहीं।</p>
+</div></div>
+
+<script>
+function openPortal(which){document.getElementById(which==='owner'?'ownerPortal':'customerPortal').style.display='flex'}
+function closePortal(id){document.getElementById(id).style.display='none'}
+function closeOutside(e,id){if(e.target.id===id)closePortal(id)}
+function saveOwner(){
+ const n=document.getElementById('ownerInput').value.trim()||'Demo Game Owner';
+ document.getElementById('ownerName').textContent=n;
+ alert('Owner profile saved (demo).');
+}
+function registerCustomer(){
+ const name=document.getElementById('custName').value.trim();
+ const mobile=document.getElementById('custMobile').value.trim();
+ const pass=document.getElementById('custPass').value;
+ if(!name || !/^\d{10}$/.test(mobile) || pass.length<4){
+   document.getElementById('regMsg').textContent='नाम, 10-digit mobile और कम से कम 4-character password भरें।';
+   return;
+ }
+ document.getElementById('regMsg').textContent='Demo account created successfully for '+name+' ✓';
+}
+</script>
+
+<div id="customerModal" class="portal" onclick="closeOutside(event,'customerModal')">
+<div class="portalbox">
+<button class="close" onclick="closePortal('customerModal')">✕</button>
+<h2>👤 Customer Profile</h2>
+<div class="profile"><div class="avatar">🙂</div><div><h3 id="modalName">Customer</h3><div class="small">Customer ID: <span id="modalId">—</span></div></div></div>
+<div class="row"><span>Virtual Coins</span><b id="modalBalance">0</b></div>
+<div class="formrow"><label>Coins to add/remove</label><input id="modalAmount" type="number" min="1" value="100"></div>
+<div class="adminactions">
+<button class="add" onclick="changeCoins(1)">+ Add Coins</button>
+<button class="sub" onclick="changeCoins(-1)">− Remove Coins</button>
+</div>
+<p id="modalMsg" class="small"></p>
+</div></div>
+
+<script>
+let customers=[
+ {id:'C001',name:'Rahul Demo',coins:2500},
+ {id:'C002',name:'Amit Demo',coins:1200},
+ {id:'C003',name:'Neha Demo',coins:5000}
+];
+let activeCustomer=null;
+function renderCustomers(){
+ const q=(document.getElementById('searchCustomer')?.value||'').toLowerCase();
+ const box=document.getElementById('customers');
+ box.innerHTML='';
+ customers.filter(c=>c.name.toLowerCase().includes(q)||c.id.toLowerCase().includes(q)).forEach(c=>{
+   const el=document.createElement('div'); el.className='customer';
+   el.innerHTML='<div><b>'+c.name+'</b><small>'+c.id+' · 🪙 '+c.coins.toLocaleString()+'</small></div><div class="adminactions"><button onclick="openCustomer(\''+c.id+'\')">Manage</button></div>';
+   box.appendChild(el);
+ });
+}
+function openCustomer(id){
+ activeCustomer=customers.find(c=>c.id===id);
+ if(!activeCustomer)return;
+ document.getElementById('modalName').textContent=activeCustomer.name;
+ document.getElementById('modalId').textContent=activeCustomer.id;
+ document.getElementById('modalBalance').textContent=activeCustomer.coins.toLocaleString();
+ document.getElementById('balance').textContent=activeCustomer.coins.toLocaleString();
+ document.getElementById('modalMsg').textContent='';
+ document.getElementById('customerModal').style.display='flex';
+}
+function changeCoins(dir){
+ if(!activeCustomer)return;
+ const n=Number(document.getElementById('modalAmount').value);
+ if(!Number.isFinite(n)||n<1)return;
+ if(dir<0 && n>activeCustomer.coins){document.getElementById('modalMsg').textContent='इतने coins उपलब्ध नहीं हैं।';return;}
+ activeCustomer.coins+=dir*n;
+ document.getElementById('modalBalance').textContent=activeCustomer.coins.toLocaleString();
+ document.getElementById('modalMsg').textContent=(dir>0?'Coins added ✓':'Coins removed ✓');
+ renderCustomers();
+}
+function useCustomerForGame(){
+ if(!activeCustomer)return;
+ balance=activeCustomer.coins;
+ document.getElementById('balance').textContent=balance.toLocaleString();
+ document.getElementById('result').textContent='Active customer: '+activeCustomer.name;
+ closePortal('customerModal');
+}
+function addDemoCustomer(){
+ const num=customers.length+1;
+ customers.push({id:'C'+String(num).padStart(3,'0'),name:'New Demo Customer '+num,coins:0});
+ renderCustomers();
+}
+function closePortal(id){document.getElementById(id).style.display='none'}
+function closeOutside(e,id){if(e.target.id===id)closePortal(id)}
+renderCustomers();
+</script>
+</body>
+</html>
